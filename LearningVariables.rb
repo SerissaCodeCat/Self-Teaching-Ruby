@@ -2,44 +2,89 @@ class TicTacToeContainer
     
     include Enumerable
     
-    def initialize (size = 5, defaultPossitionValue = "#")
-        @ticTacToeArray = Array.new(size)
-        for x in size do
-            temp = Array.new(size)
-            temp.each = defaultPossitionValue
-            # .each is equivilant to:
-            # for y in size do
-            #     temp[y] = defaultPossitionValue
-            # end
-            ticTacToeArray.push temp
-        end
+    def initialize (size = 3, defaultPossitionValue = "#")
+        @size = size
+        @ticTacToeArray = Array.new(size){ Array.new(size){defaultPossitionValue} }
+        @Player = "X"
     end
-
-    def print
-        puts (self.ticTacToeArray.each.to_s + " ")
-    end
-end
-
-            
-
-
-def ValidateIsPositiveNumber(x, max_attempts = 5, attempt_number = 0)
-    attempt_number = attempt_number+1
-    x = x.to_i 
-    if x <= 0
-        if attempt_number < max_attempts
-            puts ("\n" + (max_attempts - attempt_number).to_s + " attempts remaining\nplease input a whole number greater than 0.\n")
-            x = ValidateIsPositiveNumber(gets.chomp, max_attempts, attempt_number)
+    
+    #swaps player between X and O
+    def SwapPlayer
+        if @Player.to_s == "X"
+            @Player = "O"
         else
-            abort("program terminating")
+            @Player = "X"
+        end
+        puts "Now for the #{@Player} player"
+    end
+
+    #this is used to determine that the data is both a number, and within the specified range
+    def ValidateIsPositiveNumber(x, range = 100, max_attempts = 5, attempt_number = 0)
+        attempt_number = attempt_number+1
+        x = x.to_i 
+        if x <= 0 || x > range
+            if attempt_number < max_attempts
+                puts ("\n" + (max_attempts - attempt_number).to_s + " attempts remaining\nplease input a whole number greater than 0, and smaller than " + range.to_s + "\n")
+                x = ValidateIsPositiveNumber(gets.chomp, range, max_attempts, attempt_number)
+            else
+                abort("program terminating")
+            end
+        end
+        return x
+    end
+
+        #prints the current state of play to the console
+    def PrintGame
+        yCoOrd = 0
+        while yCoOrd < @size do
+            xCoOrd = 0
+            outputLine = ""
+            while xCoOrd < @size do
+                outputLine += @ticTacToeArray[xCoOrd][yCoOrd].to_s
+                xCoOrd +=1
+            end 
+            puts outputLine
+            yCoOrd += 1
         end
     end
-    return x
+
+    def PlayGame
+        gameWon = false
+        while !gameWon do
+            self.PrintGame
+            self.UpdatePossiton
+        end
+    end 
+
+    def UpdatePossiton()
+        updating = true
+        while updating == true do
+            coOrds = self.TakeGameInput
+            if @ticTacToeArray[coOrds[0]-1][coOrds[1]-1].to_s == "#"
+                @ticTacToeArray[coOrds[0]-1][coOrds[1]-1] = @Player.to_s
+                self.SwapPlayer
+                updating = false
+            else
+                puts ("You may not use a space that is already taken")
+            end
+        end
+    end
+    def TakeGameInput ()
+        updateX = nil
+        updateY = nil
+        puts ("Player #{@Player}, input your X possition as a possitive number between 1 and " + @size.to_s)
+        updateX = ValidateIsPositiveNumber(gets.chomp, @size)
+        puts ("Now input your Y possition as a possitive number between 1 and " + @size.to_s)
+        updateY = ValidateIsPositiveNumber(gets.chomp, @size)
+        return updateX, updateY
+    end
 end
 
 
 numerical_variable = 1000
 subject_variable = "picture"
+game = TicTacToeContainer.new
+
 puts "\"a picture is worth 1000 words\""
 puts "could also be written using a variable for the number and subject. for example:"
 subject_variable = subject_variable.upcase()
@@ -52,12 +97,8 @@ puts "speaking of others, what's your name friend?"
 username_variable = gets.chomp
 puts "Hi there #{username_variable}! it's nice to meet you!"
 puts "And how old are you #{username_variable}?"
-userAge_variable = ValidateIsPositiveNumber(gets.chomp)
+userAge_variable = game.ValidateIsPositiveNumber(gets.chomp)
 puts "Awesome #{username_variable}, so you are #{userAge_variable} years old"
 puts "\n we are going to play Tic Tac Toe #{username_variable}"
 
-game = TicTacToeContainer.new
-
-game.print
-
-
+game.PlayGame
