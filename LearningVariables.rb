@@ -6,6 +6,7 @@ class TicTacToeContainer
         @size = size
         @ticTacToeArray = Array.new(size){ Array.new(size){defaultPossitionValue} }
         @Player = "X"
+        @gameWon = false
     end
     
     #swaps player between X and O
@@ -33,7 +34,7 @@ class TicTacToeContainer
         return x
     end
 
-        #prints the current state of play to the console
+    #prints the current state of play to the console
     def PrintGame
         yCoOrd = 0
         while yCoOrd < @size do
@@ -49,26 +50,31 @@ class TicTacToeContainer
     end
 
     def PlayGame
-        gameWon = false
-        while !gameWon do
+        @gameWon = false
+        while !@gameWon do
             self.PrintGame
             self.UpdatePossiton
+            self.SwapPlayer
         end
     end 
 
     def UpdatePossiton()
         updating = true
+        
         while updating == true do
             coOrds = self.TakeGameInput
-            if @ticTacToeArray[coOrds[0]-1][coOrds[1]-1].to_s == "#"
-                @ticTacToeArray[coOrds[0]-1][coOrds[1]-1] = @Player.to_s
-                self.SwapPlayer
+            invertYCoOrds = ((@size-1) - (coOrds[1]-1))
+            puts "inverted Y == #{@size-1} - #{coOrds[1]-1} = #{invertYCoOrds}"
+            if @ticTacToeArray[coOrds[0]-1][invertYCoOrds].to_s == "#"
+                @ticTacToeArray[coOrds[0]-1][invertYCoOrds] = @Player.to_s
                 updating = false
             else
-                puts ("You may not use a space that is already taken")
+                puts ("You may not use a space that is already taken, #{coOrds[0].to_s}, #{coOrds[1].to_s}, currently reads as: #{@ticTacToeArray[coOrds[0]-1][invertYCoOrds].to_s}")
             end
         end
     end
+
+
     def TakeGameInput ()
         updateX = nil
         updateY = nil
