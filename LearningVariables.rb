@@ -6,7 +6,9 @@ class TicTacToeContainer
         @size = size
         @ticTacToeArray = Array.new(size){ Array.new(size){defaultPossitionValue} }
         @Player = "X"
+        @Wincount = (2 + (size/3)).to_i
         @gameWon = false
+        puts "the Array has an X size of #{@ticTacToeArray.size} and a Y size of #{@ticTacToeArray[0].size}" 
     end
     
     #swaps player between X and O
@@ -54,19 +56,23 @@ class TicTacToeContainer
         while !@gameWon do
             self.PrintGame
             self.UpdatePossiton
+            if self.CheckWinConditon
+                @gameWon = true
+                puts "The #{@Player} Player wins!"
+                return
+            end
             self.SwapPlayer
         end
     end 
 
-    def UpdatePossiton()
+    def UpdatePossiton
         updating = true
         
         while updating == true do
             coOrds = self.TakeGameInput
-            invertYCoOrds = ((@size-1) - (coOrds[1]-1))
-            puts "inverted Y == #{@size-1} - #{coOrds[1]-1} = #{invertYCoOrds}"
-            if @ticTacToeArray[coOrds[0]-1][invertYCoOrds].to_s == "#"
-                @ticTacToeArray[coOrds[0]-1][invertYCoOrds] = @Player.to_s
+            #invery the Y co-ords as consoles consider top to bottom, and humans consider bottom to top
+            if @ticTacToeArray[coOrds[0]-1][coOrds[1]-1].to_s == "#"
+                @ticTacToeArray[coOrds[0]-1][coOrds[1]-1] = @Player.to_s
                 updating = false
             else
                 puts ("You may not use a space that is already taken, #{coOrds[0].to_s}, #{coOrds[1].to_s}, currently reads as: #{@ticTacToeArray[coOrds[0]-1][invertYCoOrds].to_s}")
@@ -75,7 +81,7 @@ class TicTacToeContainer
     end
 
 
-    def TakeGameInput ()
+    def TakeGameInput
         updateX = nil
         updateY = nil
         puts ("Player #{@Player}, input your X possition as a possitive number between 1 and " + @size.to_s)
@@ -84,12 +90,63 @@ class TicTacToeContainer
         updateY = ValidateIsPositiveNumber(gets.chomp, @size)
         return updateX, updateY
     end
+    def SameSymbolCountHorizontal (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = @Wincount)
+        puts "X=#{xCoOrd} Y=#{yCoOrd} CURRENT COUNT = #{currentCount}"
+        
+        #win detection
+        if currentCount == winningCount
+            return true
+        end
+
+        #guard statements
+        if xCoOrd+1 > @size
+            return false
+        end
+        if yCoOrd + 1 > @size
+            return false
+        end
+
+        #newline or all spaces investigated check
+        if xCoOrd+1 == @size
+            if yCoOrd + 1 == @size
+                puts "checked all"
+                return false
+            end
+            return self.SameSymbolCountHorizontal(currentSymbol,0, yCoOrd+1, 0, winningCount) 
+        end
+
+        if @ticTacToeArray[xCoOrd][yCoOrd].to_s != currentSymbol
+            return self.SameSymbolCountHorizontal(currentSymbol,xCoOrd+1, yCoOrd, 0, winningCount)
+        end
+
+        puts"MATCH FOUND at #{xCoOrd}, #{yCoOrd}"
+        return self.SameSymbolCountHorizontal(currentSymbol, xCoOrd+1, yCoOrd, currentCount + 1, winningCount)
+    end
+
+    def SameSymbolCountVertical (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = 3)
+    end
+    
+    def SameSymbolCountDiagonal (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = 3)
+    end
+
+    def CheckWinConditon
+        if self.SameSymbolCountHorizontal(@Player.to_s) 
+            return true
+        end
+        if self.SameSymbolCountVertical(@Player.to_s)
+            return true
+        end 
+        if self.SameSymbolCountDiagonal(@Player.to_s)
+            return true
+        end
+        return false
+    end
 end
 
 
 numerical_variable = 1000
 subject_variable = "picture"
-game = TicTacToeContainer.new
+game = TicTacToeContainer.new(6)
 
 puts "\"a picture is worth 1000 words\""
 puts "could also be written using a variable for the number and subject. for example:"
@@ -106,5 +163,4 @@ puts "And how old are you #{username_variable}?"
 userAge_variable = game.ValidateIsPositiveNumber(gets.chomp)
 puts "Awesome #{username_variable}, so you are #{userAge_variable} years old"
 puts "\n we are going to play Tic Tac Toe #{username_variable}"
-
 game.PlayGame
