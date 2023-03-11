@@ -75,7 +75,7 @@ class TicTacToeContainer
                 @ticTacToeArray[coOrds[0]-1][coOrds[1]-1] = @Player.to_s
                 updating = false
             else
-                puts ("You may not use a space that is already taken, #{coOrds[0].to_s}, #{coOrds[1].to_s}, currently reads as: #{@ticTacToeArray[coOrds[0]-1][invertYCoOrds].to_s}")
+                puts ("You may not use a space that is already taken, #{coOrds[0].to_s}, #{coOrds[1].to_s}, currently reads as: #{@ticTacToeArray[coOrds[0]-1][coOrds[1]-1].to_s}")
             end
         end
     end
@@ -90,14 +90,11 @@ class TicTacToeContainer
         updateY = ValidateIsPositiveNumber(gets.chomp, @size)
         return updateX, updateY
     end
-    def SameSymbolCountHorizontal (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = @Wincount)
-        puts "X=#{xCoOrd} Y=#{yCoOrd} CURRENT COUNT = #{currentCount}"
-        
+    def SameSymbolCountHorizontal (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = @Wincount)        
         #win detection
         if currentCount == winningCount
             return true
         end
-
         #guard statements
         if xCoOrd+1 > @size
             return false
@@ -105,11 +102,9 @@ class TicTacToeContainer
         if yCoOrd + 1 > @size
             return false
         end
-
-        #newline or all spaces investigated check
+        #new line or all spaces investigated check
         if xCoOrd+1 == @size
             if yCoOrd + 1 == @size
-                puts "checked all"
                 return false
             end
             return self.SameSymbolCountHorizontal(currentSymbol,0, yCoOrd+1, 0, winningCount) 
@@ -119,14 +114,98 @@ class TicTacToeContainer
             return self.SameSymbolCountHorizontal(currentSymbol,xCoOrd+1, yCoOrd, 0, winningCount)
         end
 
-        puts"MATCH FOUND at #{xCoOrd}, #{yCoOrd}"
         return self.SameSymbolCountHorizontal(currentSymbol, xCoOrd+1, yCoOrd, currentCount + 1, winningCount)
     end
 
-    def SameSymbolCountVertical (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = 3)
+    def SameSymbolCountVertical (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = @Wincount)
+        #win detection
+        if currentCount == winningCount
+            return true
+        end
+        #guard statements
+        if xCoOrd+1 > @size
+            return false
+        end
+        if yCoOrd + 1 > @size
+            return false
+        end
+        #new column or all spaces investigated check
+        if yCoOrd+1 == @size
+            if xCoOrd + 1 == @size
+                return false
+            end
+            return self.SameSymbolCountVertical(currentSymbol, xCoOrd+1, 0, 0, winningCount) 
+        end
+
+        if @ticTacToeArray[xCoOrd][yCoOrd].to_s != currentSymbol
+            return self.SameSymbolCountVertical(currentSymbol, xCoOrd, yCoOrd+1, 0, winningCount)
+        end
+        return self.SameSymbolCountVertical(currentSymbol, xCoOrd, yCoOrd+1, currentCount + 1, winningCount)
     end
     
-    def SameSymbolCountDiagonal (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = 3)
+    def SameSymbolCountDiagonalLeftToRight (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = @Wincount)
+        #win detection
+        if currentCount == winningCount
+            return true
+        end
+        #guard statements
+        if xCoOrd+1 > @size
+            return false
+        end
+        if yCoOrd + 1 > @size
+            return false
+        end
+        #new column or all spaces investigated check
+        if yCoOrd+1 == @size
+            if xCoOrd + 1 == @size
+                return false
+            end
+            return self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd+1, 0, 0, winningCount) 
+        end
+
+        if @ticTacToeArray[xCoOrd][yCoOrd].to_s != currentSymbol
+            return self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd, yCoOrd+1, 0, winningCount)
+        end 
+        
+        if self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd+1, yCoOrd+1, currentCount + 1, winningCount)
+            return true
+        end
+        
+        return self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd, yCoOrd+1, 0, winningCount)
+    end
+
+    def SameSymbolCountDiagonalRightToLeft (currentSymbol = "X", xCoOrd = 0, yCoOrd = 0, currentCount = 0, winningCount = @Wincount)
+        #win detection
+        if currentCount == winningCount
+            return true
+        end
+        #guard statements
+        if xCoOrd+1 > @size
+            return false
+        end
+        if yCoOrd + 1 > @size
+            return false
+        end
+        if yCoOrd < 0
+            return false
+        end
+        #new column or all spaces investigated check
+        if yCoOrd+1 == @size
+            if xCoOrd + 1 == @size
+                return false
+            end
+            return self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd+1, 0, 0, winningCount) 
+        end
+
+        if @ticTacToeArray[xCoOrd][yCoOrd].to_s != currentSymbol
+            return self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd, yCoOrd+1, 0, winningCount)
+        end 
+        
+        if self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd+1, yCoOrd-1, currentCount + 1, winningCount)
+            return true
+        end
+        
+        return self.SameSymbolCountDiagonalLeftToRight(currentSymbol, xCoOrd, yCoOrd+1, 0, winningCount)
     end
 
     def CheckWinConditon
@@ -136,7 +215,10 @@ class TicTacToeContainer
         if self.SameSymbolCountVertical(@Player.to_s)
             return true
         end 
-        if self.SameSymbolCountDiagonal(@Player.to_s)
+        if self.SameSymbolCountDiagonalLeftToRight(@Player.to_s)
+            return true
+        end
+        if self.SameSymbolCountDiagonalRightToLeft(@Player.to_s)
             return true
         end
         return false
